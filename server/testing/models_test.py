@@ -23,17 +23,19 @@ class TestAuthor:
             with pytest.raises(ValueError):
                 author2 = Author(name = '', phone_number = '1231144321')
 
-    def test_requires_unique_name(self):
-        '''requires each record to have a unique name.'''
+    def test_requires_unique_name():
+     '''requires each record to have a unique name.'''
+    
+     with app.app_context():
+        author_a = Author(name='Ben', phone_number='1231144321')
+        db.session.add(author_a)
+        db.session.commit()
         
-        with app.app_context():
-            author_a = Author(name = 'Ben', phone_number = '1231144321')
-            db.session.add(author_a)
+     with pytest.raises(ValueError, match="Not valid name"):
+            author_b = Author(name='Ben', phone_number='1231144321')
+            db.session.add(author_b)
             db.session.commit()
-            
-            with pytest.raises(ValueError):
-                author_b = Author(name = 'Ben', phone_number = '1231144321')
-                
+
             db.session.query(Author).delete()
             db.session.commit()
 
