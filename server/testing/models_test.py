@@ -4,12 +4,12 @@ from app import app
 from models import db, Author, Post
 import logging
 from faker import Faker
-
+import unittest
 
 LOGGER = logging.getLogger(__name__)
 
 
-class TestAuthor:
+class TestAuthor(unittest.TestCase):
     '''Class Author in models.py'''
 
     def test_requires_name(self):
@@ -23,21 +23,20 @@ class TestAuthor:
             with pytest.raises(ValueError):
                 author2 = Author(name = '', phone_number = '1231144321')
 
-    def test_requires_unique_name():
-     '''requires each record to have a unique name.'''
-    
-     with app.app_context():
-        author_a = Author(name='Ben', phone_number='1231144321')
-        db.session.add(author_a)
+    def test_requires_unique_name(self):
+      with app.app_context():
+        author = Author(name="UniqueName", phone_number="1234567890")
+        db.session.add(author)
         db.session.commit()
-        
-     with pytest.raises(ValueError, match="Not valid name"):
-            author_b = Author(name='Ben', phone_number='1231144321')
-            db.session.add(author_b)
+
+        # Try to add another author with the same name, it should raise an error
+        with self.assertRaises(ValueError) as context:
+            duplicate_author = Author(name="UniqueName", phone_number="9876543210")
+            db.session.add(duplicate_author)
             db.session.commit()
 
-            db.session.query(Author).delete()
-            db.session.commit()
+        # Check if the error message matches your expectation
+        self.assertIn("Not valid name", str(context.exception))
 
     def test_requires_ten_digit_phone_number(self):
         '''requires each phone number to be exactly ten digits.'''

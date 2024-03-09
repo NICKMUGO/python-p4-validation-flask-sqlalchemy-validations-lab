@@ -58,5 +58,6 @@ class Post(db.Model):
         if len(summary) > 250:
             raise ValueError('Summary too long')
         return summary
+    
     def __repr__(self):
         return f'Post(id={self.id}, title={self.title} content={self.content}, summary={self.summary})'
